@@ -11,6 +11,8 @@
 
 FROM rust:latest AS build
 
+ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+
 WORKDIR /build
 
 COPY . .
@@ -21,6 +23,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     && mkdir /output \
     && cp target/release/*.so /output
 
-FROM mariadb:10.9
+FROM mariadb:10.10
 
 COPY --from=build /output/* /usr/lib/mysql/plugin/

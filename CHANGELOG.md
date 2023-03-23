@@ -4,9 +4,10 @@
 
 ## [Unreleased] - ReleaseDate
 
-### Added
-
 ### Changed
+
+- Update dependencies
+- Update CI and docker files to use sparse registry, for faster build times
 
 
 ## [0.1.4] - 2023-01-03
