@@ -7,11 +7,10 @@ on:
   push:
     tags:
     - 'v*'
-# on:
-#   pull_request:
 
 env:
   RUSTFLAGS: "-D warnings --cfg uuid_unstable"
+  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
 
 jobs:
   build_release:
@@ -54,13 +53,9 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
         # Install cargo
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-          target: ${{ matrix.target }}
-        # Debugging aid
+          targets: ${{ matrix.target }}
       - name: Show commands
         run: |
           echo pwd:
@@ -70,11 +65,7 @@ jobs:
           echo "cargo command is: ${{ env.CARGO }}"
           echo "target flag is: ${{ env.TARGET_FLAGS }}"
           echo "target dir is: ${{ env.TARGET_DIR }}"
-        # Perform build
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --verbose --target ${{ matrix.target }}
+      - run: cargo build --release --verbose --target ${{ matrix.target }}
       - name: Show output
         run: |
           ls target

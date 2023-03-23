@@ -133,6 +133,8 @@ docker exec -it mariadb_udf_suite mysql -pexample
 
 The UDFs can then be loaded using the `CREATE FUNCTION` statements above.
 
+This project has a MSRV of 1.65, but makes no commitment to uphold this.
+
 
 ## License
 
