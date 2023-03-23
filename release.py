@@ -32,7 +32,6 @@ def get_args():
     parser = argparse.ArgumentParser(description="Release a new UDF suite version.")
     parser.add_argument("level", choices=("major", "minor", "patch"))
     parser.add_argument("--execute", action="store_true")
-    parser.add_argument("--tag", required=True)
     args = parser.parse_args()
     return args
 
@@ -95,7 +94,8 @@ def update_all_tomls(level: SemvarLevel, execute: bool = False) -> str:
     return next_version
 
 
-def update_changelog(version: str, tag_name: str, execute: bool):
+def update_changelog(version: str, execute: bool):
+    tag_name = f"v{version}"
     with open("CHANGELOG.md", "r") as f:
         s = f.read()
 
@@ -128,7 +128,7 @@ def main():
     next_version = update_all_tomls(args.level, args.execute)
 
     print("\nUpdating changelog")
-    update_changelog(next_version, args.tag, args.execute)
+    update_changelog(next_version, args.execute)
 
 
 if __name__ == "__main__":
