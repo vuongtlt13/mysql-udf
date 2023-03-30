@@ -4,6 +4,8 @@ A collection of UDFs for MariaDB & MySQL, written using the rust [`udf`]
 library. For instructions on how to use these libraries, jump to the
 [Installation](#installation) section.
 
+New function contributions are welcome!
+
 [`udf`]: http://docs.rs/udf
 
 ## Included UDFs
