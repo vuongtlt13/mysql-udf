@@ -9,6 +9,13 @@
 ### Changed
 
 
+## [0.1.6] - 2023-04-28
+
+### Added
+
+- Add `uuid_to_bin` and `uuid_from_bin`/`bin_to_uuid` functions
+
+
 ## [0.1.5] - 2023-03-23
 
 ### Changed
@@ -58,7 +65,8 @@ Changed licensing from 'Apache-2.0' to 'Apache-2.0 OR GPL-2.0-or-later'
 
 <!-- next-url -->
 
-[Unreleased]: https://github.com/pluots/udf-suite/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/pluots/udf-suite/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/pluots/udf-suite/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/pluots/udf-suite/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/pluots/udf-suite/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/pluots/udf-suite/compare/v0.1.2...v0.1.3
