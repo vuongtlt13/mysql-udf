@@ -93,7 +93,7 @@ CREATE FUNCTION uuid_is_valid RETURNS integer SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_to_bin RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_from_bin RETURNS string SONAME 'libudf_uuid.so';
 -- alias for 'uuid_from_bin'
-CREATE FUNCTION  RETURNS string SONAME 'libudf_uuid.so';
+CREATE FUNCTION bin_from_uuid RETURNS string SONAME 'libudf_uuid.so';
 ```
 
 Usage is as follows:
