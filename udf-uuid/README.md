@@ -61,9 +61,17 @@ There are also some functions that return constant values:
 * `uuid_ns_oid()`: Return the ISO OID namespace UUID
 * `uuid_ns_x500()`: Return the X.500 namespace UUID
 
-And a helper function:
+A helper function:
 
 * `uuid_is_valid(uuid)`: Check whether a given UUID is valid
+
+And conversion functions:
+
+* `uuid_to_bin`: Convert a UUID to binary representation. Optionally rearranges
+  the UUID so that v1 UUIDs will be indexable by time. (note: v6 and v7 UUIDs
+  are already formatted this way, so should be preferred if possible)
+* `uuid_from_bin` (alias `bin_to_uuid`): Convert a binary representation of a
+  UUID to a string. Optionally dearranges bytes.
 
 ## Usage
 
@@ -82,22 +90,43 @@ CREATE FUNCTION uuid_ns_url RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_ns_oid RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_ns_x500 RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_is_valid RETURNS integer SONAME 'libudf_uuid.so';
+CREATE FUNCTION uuid_to_bin RETURNS string SONAME 'libudf_uuid.so';
+CREATE FUNCTION uuid_from_bin RETURNS string SONAME 'libudf_uuid.so';
+-- alias for 'uuid_from_bin'
+CREATE FUNCTION  RETURNS string SONAME 'libudf_uuid.so';
 ```
 
 Usage is as follows:
 
 ```sql
+SET @uuid = '6ccd780c-baba-1026-9564-5b8c656024db';
+
+-- Create various UUIDs
 SELECT uuid_generate_v1();
 SELECT uuid_generate_v1mc();
 SELECT uuid_generate_v4();
+-- Create a v6 UUID with a random node address
 SELECT uuid_generate_v6();
+-- Create a v6 UUID with a specified node address
 SELECT uuid_generate_v6('123abc');
 SELECT uuid_generate_v7();
+
+-- UUID constants
 SELECT uuid_nil();
 SELECT uuid_max();
 SELECT uuid_ns_dns();
 SELECT uuid_ns_url();
 SELECT uuid_ns_oid();
 SELECT uuid_ns_x500();
+
+-- Check UUID validity
 SELECT uuid_is_valid(uuid_generate_v4());
+SELECT uuid_is_valid(@uuid);
+SELECT uuid_is_valid('definitely not valid');
+
+-- Do some conversions
+SELECT uuid_to_bin(uuid_generate_v4());
+SELECT uuid_from_bin(uuid_to_bin(@uuid));
+-- "true" specifies that bytes should be arranged for time sortability
+SELECT uuid_from_bin(uuid_to_bin(@uuid, true), true);
 ```

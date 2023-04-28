@@ -18,8 +18,28 @@ Provide UUID functions similar to the Postges [`uuid-osp`] package:
 - Generate the new v6 and v7 UUIDs
 - Validate UUIDs
 - Create namespace UUIDs
+- `uuid_to_bin` and `uuid_from_bin`/`bin_to_uuid` functions, including bit
+  rearranging options
 
 See the [UUID Readme](/udf-uuid/README.md) for more information
+
+```text
+MariaDB [(none)]> select uuid_generate_v6();
++--------------------------------------+
+| uuid_generate_v6()                   |
++--------------------------------------+
+| 1ede5b09-ea01-6208-bca8-8809c0dd8e70 |
++--------------------------------------+
+1 row in set (0.000 sec)
+
+MariaDB [(none)]> select hex(uuid_to_bin(uuid_generate_v4()));
++--------------------------------------+
+| hex(uuid_to_bin(uuid_generate_v4())) |
++--------------------------------------+
+| B1B3AB9D490A4D20BFBD026AB1C045FB     |
++--------------------------------------+
+1 row in set (0.002 sec)
+```
 
 [`uuid-osp`]: https://www.postgresql.org/docs/current/uuid-ossp.html
 
@@ -28,7 +48,7 @@ See the [UUID Readme](/udf-uuid/README.md) for more information
 Provide the function `jsonify`, which quickly creates JSON output for any given
 inputs.
 
-```
+```text
 MariaDB [db]> select jsonify(qty, cost, class) from t1 limit 4;
 +-------------------------------------+
 | jsonify(qty, cost, class)           |
@@ -43,7 +63,7 @@ MariaDB [db]> select jsonify(qty, cost, class) from t1 limit 4;
 
 Aliasing also works to change key names:
 
-```
+```text
 MariaDB [db]> select jsonify(uuid() as uuid, qty as quantity, cost) from t1 limit 4;
 +----------------------------------------------------------------------------+
 | jsonify(uuid() as uuid, qty as quantity, cost)                             |
@@ -62,7 +82,7 @@ MariaDB [db]> select jsonify(uuid() as uuid, qty as quantity, cost) from t1 limi
 Uses the [lipsum crate] to generate lipsum strings with a specified word count.
 
 
-```
+```text
 MariaDB [(none)]> select lipsum(10);
 +------------------------------------------------------------------+
 | lipsum(10)                                                       |
@@ -96,6 +116,10 @@ CREATE FUNCTION uuid_ns_url RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_ns_oid RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_ns_x500 RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_is_valid RETURNS integer SONAME 'libudf_uuid.so';
+CREATE FUNCTION uuid_to_bin RETURNS string SONAME 'libudf_uuid.so';
+CREATE FUNCTION uuid_from_bin RETURNS string SONAME 'libudf_uuid.so';
+-- alias for 'uuid_from_bin'
+CREATE FUNCTION bin_to_uuid RETURNS string SONAME 'libudf_uuid.so';
 ```
 
 Note that Windows `.dll`s are built but have not been tested - please open an
@@ -121,16 +145,19 @@ up and running:
 
 ```sh
 # build the image
-docker build . --tag mdb-udf-suite
+docker build . --tag mdb-udf-suite-img
 
-# run it
+# run it in the background
 docker run --rm -d \
   -e MARIADB_ROOT_PASSWORD=example \
-  --name mariadb_udf_suite \
-  mdb-udf-suite
+  --name mdb_udf_suite \
+  mdb-udf-suite-img
 
 # Enter a SQL shell
-docker exec -it mariadb_udf_suite mysql -pexample
+docker exec -it mdb_udf_suite mysql -pexample
+
+# Stop the server when done
+docker stop mdb_udf_suite
 ```
 
 The UDFs can then be loaded using the `CREATE FUNCTION` statements above.

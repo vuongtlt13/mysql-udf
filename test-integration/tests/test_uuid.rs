@@ -6,19 +6,16 @@ mod backend;
 use backend::get_db_connection;
 use diesel::dsl::sql;
 use diesel::prelude::*;
-use diesel::sql_types::{Integer, Text};
-use uuid::Uuid;
+use diesel::sql_types::{Binary, Integer, Text};
+use uuid::{Bytes as UuidBytes, Uuid};
 
-const SETUP: [&str; 12] = [
+const SETUP: &[&str] = &[
     "create or replace function uuid_generate_v1
         returns string
         soname 'libudf_uuid.so'",
     "create or replace function uuid_generate_v1mc
         returns string
         soname 'libudf_uuid.so'",
-    // "create or replace function uuid_generate_v1
-    //     returns string
-    //     soname 'libudf_uuid.so'",
     "create or replace function uuid_generate_v4
         returns string
         soname 'libudf_uuid.so'",
@@ -26,6 +23,15 @@ const SETUP: [&str; 12] = [
         returns string
         soname 'libudf_uuid.so'",
     "create or replace function uuid_generate_v7
+        returns string
+        soname 'libudf_uuid.so'",
+    "create or replace function uuid_to_bin
+        returns string
+        soname 'libudf_uuid.so'",
+    "create or replace function uuid_from_bin
+        returns string
+        soname 'libudf_uuid.so'",
+    "create or replace function bin_to_uuid
         returns string
         soname 'libudf_uuid.so'",
     "create or replace function uuid_nil
@@ -53,7 +59,7 @@ const SETUP: [&str; 12] = [
 
 #[test]
 fn test_nil() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_nil()").get_result(conn).unwrap();
 
@@ -63,7 +69,7 @@ fn test_nil() {
 
 #[test]
 fn test_max() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_max()").get_result(conn).unwrap();
 
@@ -73,7 +79,7 @@ fn test_max() {
 
 #[test]
 fn test_ns_dns() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_ns_dns()")
         .get_result(conn)
@@ -85,7 +91,7 @@ fn test_ns_dns() {
 
 #[test]
 fn test_ns_url() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_ns_url()")
         .get_result(conn)
@@ -97,7 +103,7 @@ fn test_ns_url() {
 
 #[test]
 fn test_ns_oid() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_ns_oid()")
         .get_result(conn)
@@ -109,7 +115,7 @@ fn test_ns_oid() {
 
 #[test]
 fn test_ns_x500() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_ns_x500()")
         .get_result(conn)
@@ -121,7 +127,7 @@ fn test_ns_x500() {
 
 #[test]
 fn test_generate_v1() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_generate_v1()")
         .get_result(conn)
@@ -134,7 +140,7 @@ fn test_generate_v1() {
 
 #[test]
 fn test_generate_v1mc() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_generate_v1mc()")
         .get_result(conn)
@@ -147,7 +153,7 @@ fn test_generate_v1mc() {
 
 #[test]
 fn test_generate_v4() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_generate_v4()")
         .get_result(conn)
@@ -160,7 +166,7 @@ fn test_generate_v4() {
 
 #[test]
 fn test_generate_v6() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_generate_v6()")
         .get_result(conn)
@@ -185,7 +191,7 @@ fn test_generate_v6() {
 
 #[test]
 fn test_generate_v7() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: String = sql::<Text>("select uuid_generate_v7()")
         .get_result(conn)
@@ -198,11 +204,68 @@ fn test_generate_v7() {
 
 #[test]
 fn test_valid() {
-    let conn = &mut get_db_connection(&SETUP);
+    let conn = &mut get_db_connection(SETUP);
 
     let res: i32 = sql::<Integer>("select uuid_is_valid(uuid_generate_v4())")
         .get_result(conn)
         .unwrap();
 
     assert_eq!(res, 1);
+}
+
+const INPUT: &str = "6ccd780c-baba-1026-9564-5b8c656024db";
+const NORMAL: UuidBytes = hex_literal::hex!("6CCD780CBABA102695645B8C656024DB");
+const SWAPPED: UuidBytes = hex_literal::hex!("1026BABA6CCD780C95645B8C656024DB");
+
+#[test]
+fn test_uuid_to_from_bin() {
+    // test everything with both functions
+    for from_fn in ["uuid_from_bin", "bin_to_uuid"] {
+        eprintln!("testing with '{from_fn}'");
+
+        let conn = &mut get_db_connection(SETUP);
+
+        let u2b_res: Vec<u8> = sql::<Binary>(&format!("select uuid_to_bin('{INPUT}')"))
+            .get_result(conn)
+            .unwrap();
+
+        assert_eq!(u2b_res, NORMAL);
+
+        let u2b_swp_res: Vec<u8> = sql::<Binary>(&format!("select uuid_to_bin('{INPUT}', true)"))
+            .get_result(conn)
+            .unwrap();
+
+        assert_eq!(u2b_swp_res, SWAPPED);
+
+        let b2u_res: String = sql::<Text>(&format!(
+            "select {from_fn}(unhex('{}'))",
+            hex::encode(NORMAL)
+        ))
+        .get_result(conn)
+        .unwrap();
+
+        assert_eq!(b2u_res, INPUT);
+
+        let b2u_swp_res: String = sql::<Text>(&format!(
+            "select {from_fn}(unhex('{}'), true)",
+            hex::encode(SWAPPED)
+        ))
+        .get_result(conn)
+        .unwrap();
+
+        assert_eq!(b2u_swp_res, INPUT);
+
+        let roundtrip: String = sql::<Text>(&format!("select {from_fn}(uuid_to_bin('{INPUT}'))"))
+            .get_result(conn)
+            .unwrap();
+
+        assert_eq!(roundtrip, INPUT);
+
+        let roundtrip_swp: String =
+            sql::<Text>(&format!("select {from_fn}(uuid_to_bin('{INPUT}', 1), 1)"))
+                .get_result(conn)
+                .unwrap();
+
+        assert_eq!(roundtrip_swp, INPUT);
+    }
 }
