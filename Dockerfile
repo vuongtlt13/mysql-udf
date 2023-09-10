@@ -23,6 +23,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     && mkdir /output \
     && cp target/release/*.so /output
 
-FROM mariadb:10.10
+FROM mariadb:11.1
 
 COPY --from=build /output/* /usr/lib/mysql/plugin/

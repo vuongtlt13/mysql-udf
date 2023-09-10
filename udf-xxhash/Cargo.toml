@@ -1,0 +1,13 @@
+[package]
+name = "udf-xxhash"
+version = "0.1.6"
+edition = "2021"
+publish = false
+license = "Apache-2.0 OR GPL-2.0-or-later"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+udf = { version = "0.5.4", features = ["mock"] }
+xxhash-rust = { version = "0.8.7", features = ["xxh3", "xxh32", "xxh64"] }

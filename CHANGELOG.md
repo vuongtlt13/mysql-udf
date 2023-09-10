@@ -6,8 +6,11 @@
 
 ### Added
 
-### Changed
-
+- Add `xxhash` hashing algorithm. This includes the following:
+  - `xxhash3`
+  - `xxhash32`
+  - `xxhash64`
+  - `xxhash` (an alias for `xxhash64`)
 
 ## [0.1.6] - 2023-04-28
 
