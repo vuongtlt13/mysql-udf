@@ -43,8 +43,8 @@ impl BasicUdf for UuidToBin {
     ) -> Result<Self::Returns<'a>, ProcessError> {
         let input = args.get(0).unwrap().value();
         let in_str = input.as_bytes().unwrap();
-        let Ok(uuid) =  Uuid::try_parse_ascii(in_str) else {
-            return Ok(None)
+        let Ok(uuid) = Uuid::try_parse_ascii(in_str) else {
+            return Ok(None);
         };
 
         let bytes = uuid.as_bytes();

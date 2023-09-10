@@ -25,7 +25,7 @@ impl BasicUdf for UuidIsValid {
     ) -> Result<Self::Returns<'a>, ProcessError> {
         let input = args.get(0).unwrap().value();
         let Some(in_str) = input.as_string() else {
-            return Ok(0)
+            return Ok(0);
         };
 
         let in_rep = in_str.replace('-', ""); // Remove hyphens
