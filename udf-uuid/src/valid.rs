@@ -7,7 +7,7 @@ use crate::validate_arg_count;
 #[derive(Debug, PartialEq)]
 struct UuidIsValid;
 
-#[register]
+#[register(name = "uuid_is_valid")]
 impl BasicUdf for UuidIsValid {
     type Returns<'a> = i64;
 

@@ -11,12 +11,12 @@ use crate::{validate_arg_count, HYPHENATED_UUID_LEN, HYPHENATED_UUID_LEN_U64};
 #[derive(Debug)]
 struct UuidGenerateV1 {
     /// We save the mac address during the `init` call because that won't change.
-    /// Saves a few ms, maybe
+    /// Saves a few us, maybe
     mac: [u8; 6],
     res: [u8; HYPHENATED_UUID_LEN],
 }
 
-#[register]
+#[register(name = "uuid_generate_v1")]
 impl BasicUdf for UuidGenerateV1 {
     type Returns<'a> = &'a [u8];
 
@@ -51,10 +51,10 @@ impl BasicUdf for UuidGenerateV1 {
 
 /// V1 UUID with randomized MAC address
 #[derive(Debug)]
-struct UuidGenerateV1mc([u8; HYPHENATED_UUID_LEN]);
+struct UuidGenerateV1RandomMac([u8; HYPHENATED_UUID_LEN]);
 
-#[register]
-impl BasicUdf for UuidGenerateV1mc {
+#[register(name = "uuid_generate_v1mc")]
+impl BasicUdf for UuidGenerateV1RandomMac {
     type Returns<'a> = &'a [u8];
 
     fn init(cfg: &UdfCfg<Init>, args: &ArgList<Init>) -> Result<Self, String> {
@@ -84,7 +84,7 @@ impl BasicUdf for UuidGenerateV1mc {
 #[derive(Debug)]
 struct UuidGenerateV4([u8; HYPHENATED_UUID_LEN]);
 
-#[register]
+#[register(name = "uuid_generate_v4")]
 impl BasicUdf for UuidGenerateV4 {
     type Returns<'a> = &'a [u8];
 
@@ -111,7 +111,7 @@ impl BasicUdf for UuidGenerateV4 {
 #[derive(Debug)]
 struct UuidGenerateV6([u8; HYPHENATED_UUID_LEN]);
 
-#[register]
+#[register(name = "uuid_generate_v6")]
 impl BasicUdf for UuidGenerateV6 {
     type Returns<'a> = &'a [u8];
 
@@ -160,7 +160,7 @@ impl BasicUdf for UuidGenerateV6 {
 #[derive(Debug)]
 struct UuidGenerateV7([u8; HYPHENATED_UUID_LEN]);
 
-#[register]
+#[register(name = "uuid_generate_v7")]
 impl BasicUdf for UuidGenerateV7 {
     type Returns<'a> = &'a [u8];
 

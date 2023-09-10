@@ -10,7 +10,7 @@ use crate::{HYPHENATED_UUID_LEN, HYPHENATED_UUID_LEN_U64, UUID_BYTES_LEN, UUID_B
 #[derive(Debug, Default)]
 struct UuidToBin(UuidBytes);
 
-#[register]
+#[register(name = "uuid_to_bin")]
 impl BasicUdf for UuidToBin {
     type Returns<'a> = Option<&'a [u8]>;
 
@@ -66,7 +66,7 @@ impl BasicUdf for UuidToBin {
 #[derive(Debug)]
 struct UuidFromBin([u8; HYPHENATED_UUID_LEN]);
 
-#[register]
+#[register(name = "uuid_from_bin", alias = "bin_to_uuid")]
 impl BasicUdf for UuidFromBin {
     type Returns<'a> = Option<&'a str>;
 
@@ -119,28 +119,6 @@ impl BasicUdf for UuidFromBin {
         let ret = uuid.hyphenated().encode_lower(&mut self.0);
 
         Ok(Some(ret))
-    }
-}
-
-/// Alias to `uuid_from_bin`
-#[derive(Debug)]
-struct BinToUuid(UuidFromBin);
-
-#[register]
-impl BasicUdf for BinToUuid {
-    type Returns<'a> = Option<&'a str>;
-
-    fn init(cfg: &UdfCfg<Init>, args: &ArgList<Init>) -> Result<Self, String> {
-        Ok(Self(UuidFromBin::init(cfg, args)?))
-    }
-
-    fn process<'a>(
-        &'a mut self,
-        cfg: &UdfCfg<Process>,
-        args: &ArgList<Process>,
-        error: Option<NonZeroU8>,
-    ) -> Result<Self::Returns<'a>, ProcessError> {
-        UuidFromBin::process(&mut self.0, cfg, args, error)
     }
 }
 
