@@ -9,11 +9,11 @@ license = "Apache-2.0 OR GPL-2.0-or-later"
 
 [dev-dependencies]
 regex = "1.9.5"
-diesel = { version = "2.1.1", features = ["mysql"] }
 lazy_static = "1.4.0"
 uuid = { version = "1.4.1", features = ["v1", "v3", "v4", "v5", "fast-rng"] }
 hex-literal = "0.4.1"
 hex = "0.4.3"
+mysql = "24.0.0"
 
 [features]
 # Used to optionally enable integration tests

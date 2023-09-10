@@ -2,11 +2,8 @@
 
 mod backend;
 
-// use backend::get_db_connection;
 use backend::get_db_connection;
-use diesel::dsl::sql;
-use diesel::prelude::*;
-use diesel::sql_types::{Binary, Integer, Text};
+use mysql::prelude::*;
 use uuid::{Bytes as UuidBytes, Uuid};
 
 const SETUP: &[&str] = &[
@@ -61,7 +58,7 @@ const SETUP: &[&str] = &[
 fn test_nil() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_nil()").get_result(conn).unwrap();
+    let res: String = conn.query_first("select uuid_nil()").unwrap().unwrap();
 
     assert_eq!(res, "00000000-0000-0000-0000-000000000000");
     assert_eq!(res, Uuid::nil().hyphenated().to_string());
@@ -71,7 +68,7 @@ fn test_nil() {
 fn test_max() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_max()").get_result(conn).unwrap();
+    let res: String = conn.query_first("select uuid_max()").unwrap().unwrap();
 
     assert_eq!(res, "ffffffff-ffff-ffff-ffff-ffffffffffff");
     assert_eq!(res, Uuid::max().hyphenated().to_string());
@@ -81,9 +78,7 @@ fn test_max() {
 fn test_ns_dns() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_ns_dns()")
-        .get_result(conn)
-        .unwrap();
+    let res: String = conn.query_first("select uuid_ns_dns()").unwrap().unwrap();
 
     assert_eq!(res, "6ba7b810-9dad-11d1-80b4-00c04fd430c8");
     assert_eq!(res, Uuid::NAMESPACE_DNS.hyphenated().to_string());
@@ -93,9 +88,7 @@ fn test_ns_dns() {
 fn test_ns_url() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_ns_url()")
-        .get_result(conn)
-        .unwrap();
+    let res: String = conn.query_first("select uuid_ns_url()").unwrap().unwrap();
 
     assert_eq!(res, "6ba7b811-9dad-11d1-80b4-00c04fd430c8");
     assert_eq!(res, Uuid::NAMESPACE_URL.hyphenated().to_string());
@@ -105,9 +98,7 @@ fn test_ns_url() {
 fn test_ns_oid() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_ns_oid()")
-        .get_result(conn)
-        .unwrap();
+    let res: String = conn.query_first("select uuid_ns_oid()").unwrap().unwrap();
 
     assert_eq!(res, "6ba7b812-9dad-11d1-80b4-00c04fd430c8");
     assert_eq!(res, Uuid::NAMESPACE_OID.hyphenated().to_string());
@@ -117,9 +108,7 @@ fn test_ns_oid() {
 fn test_ns_x500() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_ns_x500()")
-        .get_result(conn)
-        .unwrap();
+    let res: String = conn.query_first("select uuid_ns_x500()").unwrap().unwrap();
 
     assert_eq!(res, "6ba7b814-9dad-11d1-80b4-00c04fd430c8");
     assert_eq!(res, Uuid::NAMESPACE_X500.hyphenated().to_string());
@@ -129,8 +118,9 @@ fn test_ns_x500() {
 fn test_generate_v1() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_generate_v1()")
-        .get_result(conn)
+    let res: String = conn
+        .query_first("select uuid_generate_v1()")
+        .unwrap()
         .unwrap();
 
     let uuid = Uuid::try_parse(&res).unwrap();
@@ -142,8 +132,9 @@ fn test_generate_v1() {
 fn test_generate_v1mc() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_generate_v1mc()")
-        .get_result(conn)
+    let res: String = conn
+        .query_first("select uuid_generate_v1mc()")
+        .unwrap()
         .unwrap();
 
     let uuid = Uuid::try_parse(&res).unwrap();
@@ -155,8 +146,9 @@ fn test_generate_v1mc() {
 fn test_generate_v4() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_generate_v4()")
-        .get_result(conn)
+    let res: String = conn
+        .query_first("select uuid_generate_v4()")
+        .unwrap()
         .unwrap();
 
     let uuid = Uuid::try_parse(&res).unwrap();
@@ -168,8 +160,9 @@ fn test_generate_v4() {
 fn test_generate_v6() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_generate_v6()")
-        .get_result(conn)
+    let res: String = conn
+        .query_first("select uuid_generate_v6()")
+        .unwrap()
         .unwrap();
 
     let uuid = Uuid::try_parse(&res).unwrap();
@@ -177,10 +170,9 @@ fn test_generate_v6() {
     assert_eq!(uuid.get_version_num(), 6);
 
     let node_id = "abcdef";
-    let res: String = sql::<Text>("select uuid_generate_v6(")
-        .bind::<Text, _>(node_id)
-        .sql(")")
-        .get_result(conn)
+    let res: String = conn
+        .exec_first("select uuid_generate_v6(?)", (node_id,))
+        .unwrap()
         .unwrap();
 
     let uuid = Uuid::try_parse(res.as_str()).unwrap();
@@ -193,8 +185,9 @@ fn test_generate_v6() {
 fn test_generate_v7() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: String = sql::<Text>("select uuid_generate_v7()")
-        .get_result(conn)
+    let res: String = conn
+        .query_first("select uuid_generate_v7()")
+        .unwrap()
         .unwrap();
 
     let uuid = Uuid::try_parse(&res).unwrap();
@@ -206,8 +199,9 @@ fn test_generate_v7() {
 fn test_valid() {
     let conn = &mut get_db_connection(SETUP);
 
-    let res: i32 = sql::<Integer>("select uuid_is_valid(uuid_generate_v4())")
-        .get_result(conn)
+    let res: i32 = conn
+        .query_first("select uuid_is_valid(uuid_generate_v4())")
+        .unwrap()
         .unwrap();
 
     assert_eq!(res, 1);
@@ -225,46 +219,51 @@ fn test_uuid_to_from_bin() {
 
         let conn = &mut get_db_connection(SETUP);
 
-        let u2b_res: Vec<u8> = sql::<Binary>(&format!("select uuid_to_bin('{INPUT}')"))
-            .get_result(conn)
+        let u2b_res: Vec<u8> = conn
+            .exec_first("select uuid_to_bin(?)", (INPUT,))
+            .unwrap()
             .unwrap();
 
         assert_eq!(u2b_res, NORMAL);
 
-        let u2b_swp_res: Vec<u8> = sql::<Binary>(&format!("select uuid_to_bin('{INPUT}', true)"))
-            .get_result(conn)
+        let u2b_swp_res: Vec<u8> = conn
+            .exec_first("select uuid_to_bin(?, true)", (INPUT,))
+            .unwrap()
             .unwrap();
 
         assert_eq!(u2b_swp_res, SWAPPED);
 
-        let b2u_res: String = sql::<Text>(&format!(
-            "select {from_fn}(unhex('{}'))",
-            hex::encode(NORMAL)
-        ))
-        .get_result(conn)
-        .unwrap();
+        let b2u_res: String = conn
+            .exec_first(
+                &format!("select {from_fn}(unhex(?))"),
+                (hex::encode(NORMAL),),
+            )
+            .unwrap()
+            .unwrap();
 
         assert_eq!(b2u_res, INPUT);
 
-        let b2u_swp_res: String = sql::<Text>(&format!(
-            "select {from_fn}(unhex('{}'), true)",
-            hex::encode(SWAPPED)
-        ))
-        .get_result(conn)
-        .unwrap();
+        let b2u_swp_res: String = conn
+            .exec_first(
+                &format!("select {from_fn}(unhex(?), true)"),
+                (hex::encode(SWAPPED),),
+            )
+            .unwrap()
+            .unwrap();
 
         assert_eq!(b2u_swp_res, INPUT);
 
-        let roundtrip: String = sql::<Text>(&format!("select {from_fn}(uuid_to_bin('{INPUT}'))"))
-            .get_result(conn)
+        let roundtrip: String = conn
+            .exec_first(&format!("select {from_fn}(uuid_to_bin(?))"), (INPUT,))
+            .unwrap()
             .unwrap();
 
         assert_eq!(roundtrip, INPUT);
 
-        let roundtrip_swp: String =
-            sql::<Text>(&format!("select {from_fn}(uuid_to_bin('{INPUT}', 1), 1)"))
-                .get_result(conn)
-                .unwrap();
+        let roundtrip_swp: String = conn
+            .exec_first(&format!("select {from_fn}(uuid_to_bin(?, 1), 1)"), (INPUT,))
+            .unwrap()
+            .unwrap();
 
         assert_eq!(roundtrip_swp, INPUT);
     }
