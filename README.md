@@ -10,6 +10,13 @@ New function contributions are welcome!
 
 ## Included UDFs
 
+The following UDFs are includes:
+
+- [UUIDs](#uuid): generate and convert v1, v2, v6, and v7 UUIDs
+- [xxhash](#xxhash): run `xxhash3`, `xxhash32`, and `xxhash64` algorithms
+- [Jsonify](#jsonify): convert any data to JSON
+- [Lipsum](#lipsum): generate random text
+
 ### UUID
 
 Provide UUID functions similar to the Postges [`uuid-osp`] package:
@@ -95,6 +102,34 @@ MariaDB [(none)]> select lipsum(10);
 [lipsum crate]: https://docs.rs/lipsum/latest/lipsum/
 
 
+## xxhash
+
+The xxhash functions are fast non-cryptographic hash algorithms. This libary
+includes `xxhash3`, `xxhash32`, `xxhash64`, and `xxhash` (an alias for
+`xxhash64`).
+
+```
+MariaDB [(none)]> select xxhash('Hello, world!');
++-------------------------+
+| xxhash('Hello, world!') |
++-------------------------+
+|     -755700219241327498 |
++-------------------------+
+1 row in set (0.000 sec)
+```
+
+Multiple arguments are combined to produce a single hash output
+
+```
+MariaDB [(none)]> select xxhash('Hello, ', 0x77, 'orld', '!');
++--------------------------------------+
+| xxhash('Hello, ', 0x77, 'orld', '!') |
++--------------------------------------+
+|                  -755700219241327498 |
++--------------------------------------+
+1 row in set (0.000 sec)
+```
+
 ## Installation
 
 Compiled library binaries can be downloaded from this library's [releases] page.
@@ -102,8 +137,15 @@ The desired files can be copied to the plugin directory (usually
 `/usr/lib/mysql/plugin`) and selectively loaded:
 
 ```sql
+-- `xxhash` and `xxhash64` are aliases
+CREATE FUNCTION xxhash RETURNS integer SONAME 'libudf_xxhash.so';
+CREATE FUNCTION xxhash3 RETURNS integer SONAME 'libudf_xxhash.so';
+CREATE FUNCTION xxhash32 RETURNS integer SONAME 'libudf_xxhash.so';
+CREATE FUNCTION xxhash64 RETURNS integer SONAME 'libudf_xxhash.so';
+
 CREATE FUNCTION jsonify RETURNS string SONAME 'libudf_jsonify.so';
 CREATE FUNCTION lipsum RETURNS string SONAME 'libudf_lipsum.so';
+
 CREATE FUNCTION uuid_generate_v1 RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_generate_v1mc RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_generate_v4 RETURNS string SONAME 'libudf_uuid.so';
@@ -118,7 +160,7 @@ CREATE FUNCTION uuid_ns_x500 RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_is_valid RETURNS integer SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_to_bin RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_from_bin RETURNS string SONAME 'libudf_uuid.so';
--- alias for 'uuid_from_bin'
+-- `bin_to_uuid` and 'uuid_from_bin' are aliases
 CREATE FUNCTION bin_to_uuid RETURNS string SONAME 'libudf_uuid.so';
 ```
 
