@@ -10,4 +10,5 @@ members = [
 
 [profile.release]
 # Minimize binary size by removing all symbols
+strip = "symbols"
 lto = "fat"
