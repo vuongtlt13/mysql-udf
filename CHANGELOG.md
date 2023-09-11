@@ -6,6 +6,13 @@
 
 ### Added
 
+### Changed
+
+
+## [0.1.7] - 2023-09-11
+
+### Added
+
 - Add `xxhash` hashing algorithm. This includes the following:
   - `xxhash3`
   - `xxhash32`
@@ -68,7 +75,8 @@ Changed licensing from 'Apache-2.0' to 'Apache-2.0 OR GPL-2.0-or-later'
 
 <!-- next-url -->
 
-[Unreleased]: https://github.com/pluots/udf-suite/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/pluots/udf-suite/compare/v0.1.7...HEAD
+[0.1.7]: https://github.com/pluots/udf-suite/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/pluots/udf-suite/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/pluots/udf-suite/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/pluots/udf-suite/compare/v0.1.3...v0.1.4

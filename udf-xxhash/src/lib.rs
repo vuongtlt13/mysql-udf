@@ -7,6 +7,7 @@
 //! CREATE FUNCTION xxhash32 RETURNS integer SONAME 'libudf_xxhash.so';
 //! CREATE FUNCTION xxhash64 RETURNS integer SONAME 'libudf_xxhash.so';
 //! CREATE FUNCTION xxhash RETURNS integer SONAME 'libudf_xxhash.so';
+//!
 //! SELECT xxhash3('Hello world!');
 //! SELECT xxhash32('Hello world!');
 //! SELECT xxhash64('Hello world!');

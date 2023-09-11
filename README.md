@@ -130,6 +130,12 @@ MariaDB [(none)]> select xxhash('Hello, ', 0x77, 'orld', '!');
 1 row in set (0.000 sec)
 ```
 
+Note that in SQL, all integers are an `i64`, all floats are a `f64`, and all
+decimals are represented as a string to the UDF API. This library hashes these
+types as their little endian representation. (You only need to worry about this
+if you have very obscure platform compatibility requirements, and strings and
+blobs are always unambiguous).
+
 ## Installation
 
 Compiled library binaries can be downloaded from this library's [releases] page.
