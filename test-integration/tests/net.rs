@@ -75,7 +75,7 @@ fn test_ip_to_ipv6_mapped() {
         .unwrap()
         .unwrap();
 
-    assert_eq!(res, T2);
+    assert_eq!(res, T3);
 
     let res: Option<String> = conn
         .exec_first("select ip_to_ipv6_mapped(?)", (T4,))
@@ -101,7 +101,7 @@ fn test_ip_to_canonical() {
         .unwrap()
         .unwrap();
 
-    assert_eq!(res, T2);
+    assert_eq!(res, T1);
 
     let res: String = conn
         .exec_first("select ip_to_canonical(?)", (T3,))
