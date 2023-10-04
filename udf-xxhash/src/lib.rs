@@ -1,4 +1,4 @@
-//! A function to generate lipsum of a given word count
+//! A function to generate the xxhash of any input
 //!
 //! # Usage
 //!

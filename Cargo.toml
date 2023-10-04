@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "udf-blake",
     "udf-jsonify",
     "udf-lipsum",
     "udf-uuid",
