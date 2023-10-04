@@ -6,6 +6,13 @@
 
 ### Added
 
+### Changed
+
+
+## [0.1.8] - 2023-10-04
+
+### Added
+
 Add blake2 and blake3 hashes:
 
 - `blake2b512`
@@ -78,7 +85,8 @@ Changed licensing from 'Apache-2.0' to 'Apache-2.0 OR GPL-2.0-or-later'
 
 <!-- next-url -->
 
-[Unreleased]: https://github.com/pluots/udf-suite/compare/v0.1.7...HEAD
+[Unreleased]: https://github.com/pluots/udf-suite/compare/v0.1.8...HEAD
+[0.1.8]: https://github.com/pluots/udf-suite/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/pluots/udf-suite/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/pluots/udf-suite/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/pluots/udf-suite/compare/v0.1.4...v0.1.5
