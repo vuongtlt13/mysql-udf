@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "udf-blake",
+    "udf-net",
     "udf-jsonify",
     "udf-lipsum",
     "udf-uuid",

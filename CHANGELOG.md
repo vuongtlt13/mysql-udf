@@ -6,7 +6,11 @@
 
 ### Added
 
-### Changed
+Add network-related functions:
+
+- `ip_validate`
+- `ip_to_canonical`
+- `ip_to_ipv6_mapped`
 
 
 ## [0.1.8] - 2023-10-04

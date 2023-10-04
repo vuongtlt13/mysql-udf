@@ -13,10 +13,12 @@ New function contributions are welcome!
 The following UDFs are includes:
 
 - [UUIDs](#uuid): generate and convert v1, v2, v6, and v7 UUIDs
-- [xxhash](#xxhash): run `xxhash3`, `xxhash32`, and `xxhash64` hash algorithms
 - [blake](#blake): run `blake2s256`, `blake2b512`, and `blake3` hash algorithms
+- [IP Functions](#ip-address-functions) for interop: `ip_validate`,
+  `ip_to_canonical`, `ip_to_ipv4_mapped`
 - [Jsonify](#jsonify): convert any data to JSON
 - [Lipsum](#lipsum): generate random text
+- [xxhash](#xxhash): run `xxhash3`, `xxhash32`, and `xxhash64` hash algorithms
 
 ### UUID
 
@@ -51,6 +53,40 @@ MariaDB [(none)]> select hex(uuid_to_bin(uuid_generate_v4()));
 
 [`uuid-osp`]: https://www.postgresql.org/docs/current/uuid-ossp.html
 
+## Blake
+
+Blake hash functions are cyptographic hash algorithms. This library includes
+`blake2s256`, `blake2b256`, and `blake3`.
+
+Since the results are binary, you will often want to call `hex()` on the
+results (unless storing directly in a `BINARY(32)`/`BINARY(64)`).
+
+```text
+MariaDB [(none)]> select hex(blake2b512("Hello, world!"));
++----------------------------------------------------------------------------------------------------------------------------------+
+| hex(blake2b512("Hello, world!"))                                                                                                 |
++----------------------------------------------------------------------------------------------------------------------------------+
+| A2764D133A16816B5847A737A786F2ECE4C148095C5FAA73E24B4CC5D666C3E45EC271504E14DC6127DDFCE4E144FB23B91A6F7B04B53D695502290722953B0F |
++----------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.000 sec)
+
+MariaDB [(none)]> select hex(blake2s256("Hello, world!"));
++------------------------------------------------------------------+
+| hex(blake2s256("Hello, world!"))                                 |
++------------------------------------------------------------------+
+| 30D8777F0E178582EC8CD2FCDC18AF57C828EE2F89E978DF52C8E7AF078BD5CF |
++------------------------------------------------------------------+
+1 row in set (0.000 sec)
+
+MariaDB [(none)]> select hex(blake3("Hello, world!"));
++------------------------------------------------------------------+
+| hex(blake3("Hello, world!"))                                     |
++------------------------------------------------------------------+
+| EDE5C0B10F2EC4979C69B52F61E42FF5B413519CE09BE0F14D098DCFE5F6F98D |
++------------------------------------------------------------------+
+1 row in set (0.000 sec)
+```
+
 ### Jsonify
 
 Provide the function `jsonify`, which quickly creates JSON output for any given
@@ -84,7 +120,6 @@ MariaDB [db]> select jsonify(uuid() as uuid, qty as quantity, cost) from t1 limi
 4 rows in set (0.001 sec)
 ```
 
-
 ### Lipsum
 
 Uses the [lipsum crate] to generate lipsum strings with a specified word count.
@@ -102,38 +137,34 @@ MariaDB [(none)]> select lipsum(10);
 
 [lipsum crate]: https://docs.rs/lipsum/latest/lipsum/
 
-## Blake
+## IP Address Functions
 
-Blake hash functions are cyptographic hash algorithms. This library includes
-`blake2s256`, `blake2b256`, and `blake3`.
+We provide three IP functions:
 
-Since the results are binary, you will often want to call `hex()` on the
-results (unless storing directly in a `BINARY(32)`/`BINARY(64)`).
-
-```text
-MariaDB [(none)]> select hex(blake2b512("Hello, world!"));
-+----------------------------------------------------------------------------------------------------------------------------------+
-| hex(blake2b512("Hello, world!"))                                                                                                 |
-+----------------------------------------------------------------------------------------------------------------------------------+
-| A2764D133A16816B5847A737A786F2ECE4C148095C5FAA73E24B4CC5D666C3E45EC271504E14DC6127DDFCE4E144FB23B91A6F7B04B53D695502290722953B0F |
-+----------------------------------------------------------------------------------------------------------------------------------+
-1 row in set (0.000 sec)
-
-MariaDB [(none)]> select hex(blake2s256("Hello, world!"));
-+------------------------------------------------------------------+
-| hex(blake2s256("Hello, world!"))                                 |
-+------------------------------------------------------------------+
-| 30D8777F0E178582EC8CD2FCDC18AF57C828EE2F89E978DF52C8E7AF078BD5CF |
-+------------------------------------------------------------------+
-1 row in set (0.000 sec)
-
-MariaDB [(none)]> select hex(blake3("Hello, world!"));
-+------------------------------------------------------------------+
-| hex(blake3("Hello, world!"))                                     |
-+------------------------------------------------------------------+
-| EDE5C0B10F2EC4979C69B52F61E42FF5B413519CE09BE0F14D098DCFE5F6F98D |
-+------------------------------------------------------------------+
-1 row in set (0.000 sec)
+- `ip_validate` which will return either `ipv4` or `ipv6` if the format is
+  valid, `NULL` otherwise.
+- `ip_to_ipv6_mapped` which converts ipv4 addresses to their ipv6 form (e.g.
+  for interop with the `INET6` data type)
+- `ip_to_canonical` which reverses the mapping operation
+```
+MariaDB [db]> select
+    ->     input,
+    ->     ip_validate(input),
+    ->     ip_to_ipv6_mapped(input),
+    ->     ip_to_canonical(input)
+    -> from t1;
++--------------------------------------+--------------------+--------------------------------------+--------------------------------------+
+| input                                | ip_validate(input) | ip_to_ipv6_mapped(input)             | ip_to_canonical(input)               |
++--------------------------------------+--------------------+--------------------------------------+--------------------------------------+
+| 203.0.113.0                          | ipv4               | ::ffff:203.0.113.0                   | 203.0.113.0                          |
+| 127.0.0.1                            | ipv4               | ::ffff:127.0.0.1                     | 127.0.0.1                            |
+| ::ffff:127.0.0.1                     | ipv6               | ::ffff:127.0.0.1                     | 127.0.0.1                            |
+| 2001:db8::1:0:0:1                    | ipv6               | 2001:db8::1:0:0:1                    | 2001:db8::1:0:0:1                    |
+| 2001:db8:85a3:8d3:1319:8a2e:370:7348 | ipv6               | 2001:db8:85a3:8d3:1319:8a2e:370:7348 | 2001:db8:85a3:8d3:1319:8a2e:370:7348 |
+| hello!                               | NULL               | NULL                                 | NULL                                 |
+| NULL                                 | NULL               | NULL                                 | NULL                                 |
++--------------------------------------+--------------------+--------------------------------------+--------------------------------------+
+7 rows in set (0.000 sec)
 ```
 
 ## xxhash
@@ -182,6 +213,11 @@ CREATE FUNCTION blake2s256 RETURNS string SONAME 'libudf_blake.so';
 CREATE FUNCTION blake3 RETURNS string SONAME 'libudf_blake.so';
 
 CREATE FUNCTION jsonify RETURNS string SONAME 'libudf_jsonify.so';
+
+CREATE FUNCTION ip_validate RETURNS string SONAME 'libudf_net.so';
+CREATE FUNCTION ip_to_canonical RETURNS string SONAME 'libudf_net.so';
+CREATE FUNCTION ip_to_ipv6_mapped RETURNS string SONAME 'libudf_net.so';
+
 CREATE FUNCTION lipsum RETURNS string SONAME 'libudf_lipsum.so';
 
 CREATE FUNCTION uuid_generate_v1 RETURNS string SONAME 'libudf_uuid.so';

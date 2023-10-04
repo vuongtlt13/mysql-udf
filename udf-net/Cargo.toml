@@ -1,0 +1,14 @@
+[package]
+name = "udf-net"
+version = "0.1.8"
+edition = "2021"
+publish = false
+license = "Apache-2.0 OR GPL-2.0-or-later"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+blake2 = "0.10.6"
+blake3 = "1.5.0"
+udf = { version = "0.5.4", features = ["mock"] }
