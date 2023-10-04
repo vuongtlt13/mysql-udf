@@ -13,7 +13,8 @@ New function contributions are welcome!
 The following UDFs are includes:
 
 - [UUIDs](#uuid): generate and convert v1, v2, v6, and v7 UUIDs
-- [xxhash](#xxhash): run `xxhash3`, `xxhash32`, and `xxhash64` algorithms
+- [xxhash](#xxhash): run `xxhash3`, `xxhash32`, and `xxhash64` hash algorithms
+- [blake](#blake): run `blake2s256`, `blake2b512`, and `blake3` hash algorithms
 - [Jsonify](#jsonify): convert any data to JSON
 - [Lipsum](#lipsum): generate random text
 
@@ -101,6 +102,39 @@ MariaDB [(none)]> select lipsum(10);
 
 [lipsum crate]: https://docs.rs/lipsum/latest/lipsum/
 
+## Blake
+
+Blake hash functions are cyptographic hash algorithms. This library includes
+`blake2s256`, `blake2b256`, and `blake3`.
+
+Since the results are binary, you will often want to call `hex()` on the
+results (unless storing directly in a `BINARY(32)`/`BINARY(64)`).
+
+```text
+MariaDB [(none)]> select hex(blake2b512("Hello, world!"));
++----------------------------------------------------------------------------------------------------------------------------------+
+| hex(blake2b512("Hello, world!"))                                                                                                 |
++----------------------------------------------------------------------------------------------------------------------------------+
+| A2764D133A16816B5847A737A786F2ECE4C148095C5FAA73E24B4CC5D666C3E45EC271504E14DC6127DDFCE4E144FB23B91A6F7B04B53D695502290722953B0F |
++----------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.000 sec)
+
+MariaDB [(none)]> select hex(blake2s256("Hello, world!"));
++------------------------------------------------------------------+
+| hex(blake2s256("Hello, world!"))                                 |
++------------------------------------------------------------------+
+| 30D8777F0E178582EC8CD2FCDC18AF57C828EE2F89E978DF52C8E7AF078BD5CF |
++------------------------------------------------------------------+
+1 row in set (0.000 sec)
+
+MariaDB [(none)]> select hex(blake3("Hello, world!"));
++------------------------------------------------------------------+
+| hex(blake3("Hello, world!"))                                     |
++------------------------------------------------------------------+
+| EDE5C0B10F2EC4979C69B52F61E42FF5B413519CE09BE0F14D098DCFE5F6F98D |
++------------------------------------------------------------------+
+1 row in set (0.000 sec)
+```
 
 ## xxhash
 
@@ -108,7 +142,7 @@ The xxhash functions are fast non-cryptographic hash algorithms. This libary
 includes `xxhash3`, `xxhash32`, `xxhash64`, and `xxhash` (an alias for
 `xxhash64`).
 
-```
+```text
 MariaDB [(none)]> select xxhash('Hello, world!');
 +-------------------------+
 | xxhash('Hello, world!') |
@@ -120,7 +154,7 @@ MariaDB [(none)]> select xxhash('Hello, world!');
 
 Multiple arguments are combined to produce a single hash output
 
-```
+```text
 MariaDB [(none)]> select xxhash('Hello, ', 0x77, 'orld', '!');
 +--------------------------------------+
 | xxhash('Hello, ', 0x77, 'orld', '!') |
@@ -143,11 +177,9 @@ The desired files can be copied to the plugin directory (usually
 `/usr/lib/mysql/plugin`) and selectively loaded:
 
 ```sql
--- `xxhash` and `xxhash64` are aliases
-CREATE FUNCTION xxhash RETURNS integer SONAME 'libudf_xxhash.so';
-CREATE FUNCTION xxhash3 RETURNS integer SONAME 'libudf_xxhash.so';
-CREATE FUNCTION xxhash32 RETURNS integer SONAME 'libudf_xxhash.so';
-CREATE FUNCTION xxhash64 RETURNS integer SONAME 'libudf_xxhash.so';
+CREATE FUNCTION blake2b512 RETURNS string SONAME 'libudf_blake.so';
+CREATE FUNCTION blake2s256 RETURNS string SONAME 'libudf_blake.so';
+CREATE FUNCTION blake3 RETURNS string SONAME 'libudf_blake.so';
 
 CREATE FUNCTION jsonify RETURNS string SONAME 'libudf_jsonify.so';
 CREATE FUNCTION lipsum RETURNS string SONAME 'libudf_lipsum.so';
@@ -168,6 +200,12 @@ CREATE FUNCTION uuid_to_bin RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_from_bin RETURNS string SONAME 'libudf_uuid.so';
 -- `bin_to_uuid` and 'uuid_from_bin' are aliases
 CREATE FUNCTION bin_to_uuid RETURNS string SONAME 'libudf_uuid.so';
+
+-- `xxhash` and `xxhash64` are aliases
+CREATE FUNCTION xxhash RETURNS integer SONAME 'libudf_xxhash.so';
+CREATE FUNCTION xxhash3 RETURNS integer SONAME 'libudf_xxhash.so';
+CREATE FUNCTION xxhash32 RETURNS integer SONAME 'libudf_xxhash.so';
+CREATE FUNCTION xxhash64 RETURNS integer SONAME 'libudf_xxhash.so';
 ```
 
 Note that Windows `.dll`s are built but have not been tested - please open an

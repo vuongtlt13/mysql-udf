@@ -6,8 +6,11 @@
 
 ### Added
 
-### Changed
+Add blake2 and blake3 hashes:
 
+- `blake2b512`
+- `blake2s256`
+- `blake3`
 
 ## [0.1.7] - 2023-09-11
 
