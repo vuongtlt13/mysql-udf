@@ -13,7 +13,14 @@ New function contributions are welcome!
 The following UDFs are includes:
 
 - [UUIDs](#uuid): generate and convert v1, v2, v6, and v7 UUIDs
-- [blake](#blake): run `blake2s256`, `blake2b512`, and `blake3` hash algorithms
+- [Hash Algorithms](#hash-algorithms): run a wide variety of hash algorithms,
+  including:
+  - `blake2b512`, `blake2s256`, `blake3`
+  - `sha224`, `sha256`, `sha384`, `sha512`
+  - `keccak224`, `keccak256`
+  - `sha3_224`, `sha3_256`, `sha3_384`, `sha3_512`
+
+ run `blake2s256`, `blake2b512`, and `blake3` hash algorithms
 - [IP Functions](#ip-address-functions) for interop: `ip_validate`,
   `ip_to_canonical`, `ip_to_ipv4_mapped`
 - [Jsonify](#jsonify): convert any data to JSON

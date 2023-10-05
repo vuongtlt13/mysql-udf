@@ -6,7 +6,12 @@
 
 ### Added
 
+
+
 ### Changed
+
+`blake*` and `xxhash*` functions were moved to the new `udf-hash` library
+(output `libudf_hash.so`).
 
 
 ## [0.1.9] - 2023-10-04
