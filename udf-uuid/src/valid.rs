@@ -48,18 +48,16 @@ mod tests {
     fn test_validate_wrong_args() {
         // Test with 0 and >1 args
         let mut arglists = [
-            (mock_args![], 0),
-            (mock_args![("", "", false), ("", "", false)], 2),
+            (mock_args!(), 0),
+            (mock_args!(("", "", false), ("", "", false)), 2),
         ];
 
         let mut cfg = MockUdfCfg::new();
 
         for (args, count) in arglists.iter_mut() {
             let res = UuidIsValid::init(cfg.as_init(), args.as_init());
-            assert_eq!(
-                res,
-                Err(format!("uuid_is_valid takes 1 argument but got {count}"))
-            );
+            let emsg = format!("uuid_is_valid takes 1 argument but got {count}");
+            assert_eq!(res, Err(emsg));
         }
     }
 
@@ -68,23 +66,23 @@ mod tests {
         // Test with 0 and >1 args
         let mut arglists = [
             (
-                mock_args![("00908d94-c78d-4ea5-8aa5-5a06868f0420", "", false)],
+                mock_args!(("00908d94-c78d-4ea5-8aa5-5a06868f0420", "", false)),
                 1,
             ),
             (
-                mock_args![("00908d94c78d4ea58aa55a06868f0420", "", false)],
+                mock_args!(("00908d94c78d4ea58aa55a06868f0420", "", false)),
                 1,
             ),
             (
-                mock_args![("00908d94c78d-4ea5-8aa55a06868f0420", "", false)],
+                mock_args!(("00908d94c78d-4ea5-8aa55a06868f0420", "", false)),
                 1,
             ),
             (
-                mock_args![("00908d94-c78d-4ea5-8aa5-5a06868f042", "", false)],
+                mock_args!(("00908d94-c78d-4ea5-8aa5-5a06868f042", "", false)),
                 0,
             ),
             (
-                mock_args![("00908d94c78d4ea58aa55a06868f042", "", false)],
+                mock_args!(("00908d94c78d4ea58aa55a06868f042", "", false)),
                 0,
             ),
         ];
