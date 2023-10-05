@@ -6,6 +6,7 @@ publish = false
 license = "Apache-2.0 OR GPL-2.0-or-later"
 
 [dependencies]
+mysql = { version = "24.0.0", default-features = false }
 
 [dev-dependencies]
 regex = "1.9.5"
