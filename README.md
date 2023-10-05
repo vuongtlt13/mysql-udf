@@ -14,18 +14,12 @@ The following UDFs are includes:
 
 - [UUIDs](#uuid): generate and convert v1, v2, v6, and v7 UUIDs
 - [Hash Algorithms](#hash-algorithms): run a wide variety of hash algorithms,
-  including:
-  - `blake2b512`, `blake2s256`, `blake3`
-  - `sha224`, `sha256`, `sha384`, `sha512`
-  - `keccak224`, `keccak256`
-  - `sha3_224`, `sha3_256`, `sha3_384`, `sha3_512`
-
- run `blake2s256`, `blake2b512`, and `blake3` hash algorithms
+  including the following families: `blake`, `sha`, `keccak`, `sha3`, and
+  `xxhash`
 - [IP Functions](#ip-address-functions) for interop: `ip_validate`,
   `ip_to_canonical`, `ip_to_ipv4_mapped`
 - [Jsonify](#jsonify): convert any data to JSON
 - [Lipsum](#lipsum): generate random text
-- [xxhash](#xxhash): run `xxhash3`, `xxhash32`, and `xxhash64` hash algorithms
 
 ### UUID
 
@@ -60,39 +54,69 @@ MariaDB [(none)]> select hex(uuid_to_bin(uuid_generate_v4()));
 
 [`uuid-osp`]: https://www.postgresql.org/docs/current/uuid-ossp.html
 
-## Blake
+## Hash Algorithms
 
-Blake hash functions are cyptographic hash algorithms. This library includes
-`blake2s256`, `blake2b256`, and `blake3`.
+This library provides the following functions:
 
-Since the results are binary, you will often want to call `hex()` on the
-results (unless storing directly in a `BINARY(32)`/`BINARY(64)`).
+  - `blake2b512`, `blake2s256`, `blake3`, `blake3_thd`. `blake3_thd` provides
+    a multithreaded hasher that can be much faster for large data; per the docs,
+    128 KiB is about the minimum size to see any signifcant improvement over
+    `blake3`.
+  - `sha224`, `sha256`, `sha384`, `sha512` (these are also built in)
+  - `keccak224`, `keccak256`
+  - `sha3_224`, `sha3_256`, `sha3_384`, `sha3_512`
+  - `xxhash3`, `xxhash32`, `xxhash64`, `xxhash` (`xxhash` is an alias for
+    `xxhash64`)
+
+All of these return hex strings by defaulti. `_bin` functions are also
+provided that return the binary result without going through hexification,
+suitable for storage in a `BINARY(X)` column.
+
 
 ```text
-MariaDB [(none)]> select hex(blake2b512("Hello, world!"));
-+----------------------------------------------------------------------------------------------------------------------------------+
-| hex(blake2b512("Hello, world!"))                                                                                                 |
-+----------------------------------------------------------------------------------------------------------------------------------+
-| A2764D133A16816B5847A737A786F2ECE4C148095C5FAA73E24B4CC5D666C3E45EC271504E14DC6127DDFCE4E144FB23B91A6F7B04B53D695502290722953B0F |
-+----------------------------------------------------------------------------------------------------------------------------------+
-1 row in set (0.000 sec)
-
-MariaDB [(none)]> select hex(blake2s256("Hello, world!"));
+MariaDB [(none)]> select blake3("Hello, world!");
 +------------------------------------------------------------------+
-| hex(blake2s256("Hello, world!"))                                 |
-+------------------------------------------------------------------+
-| 30D8777F0E178582EC8CD2FCDC18AF57C828EE2F89E978DF52C8E7AF078BD5CF |
-+------------------------------------------------------------------+
-1 row in set (0.000 sec)
-
-MariaDB [(none)]> select hex(blake3("Hello, world!"));
-+------------------------------------------------------------------+
-| hex(blake3("Hello, world!"))                                     |
+| blake3("Hello, world!")                                          |
 +------------------------------------------------------------------+
 | EDE5C0B10F2EC4979C69B52F61E42FF5B413519CE09BE0F14D098DCFE5F6F98D |
 +------------------------------------------------------------------+
 1 row in set (0.000 sec)
+
+MariaDB [(none)]> select sha3_256("Hello, world!");
++------------------------------------------------------------------+
+| sha3_256("Hello, world!")                                        |
++------------------------------------------------------------------+
+| F345A219DA005EBE9C1A1EAAD97BBF38A10C8473E41D0AF7FB617CAA0C6AA722 |
++------------------------------------------------------------------+
+1 row in set (0.000 sec)
+
+MariaDB [(none)]> select blake3_bin("Hello, world!");
++----------------------------------+
+| blake3_bin("Hello, world!")      |
++----------------------------------+
+| ����.ė�i�/a�/��Q����M        ������                      |
++----------------------------------+
+1 row in set (0.000 sec)
 ```
+
+
+For all hash functions, multiple arguments are combined to produce a single hash output:
+
+```text
+MariaDB [(none)]> select xxhash('Hello, ', 0x77, 'orld', '!');
++--------------------------------------+
+| xxhash('Hello, ', 0x77, 'orld', '!') |
++--------------------------------------+
+|                  -755700219241327498 |
++--------------------------------------+
+1 row in set (0.000 sec)
+```
+
+Note that in SQL, all integers are an `i64`, all floats are a `f64`, and all
+decimals are represented as a string to the UDF API. This library hashes these
+types as their little endian representation. (You only need to worry about this
+if you have very obscure platform compatibility requirements, and strings and
+blobs are always unambiguous).
 
 ### Jsonify
 
@@ -174,40 +198,6 @@ MariaDB [db]> select
 7 rows in set (0.000 sec)
 ```
 
-## xxhash
-
-The xxhash functions are fast non-cryptographic hash algorithms. This libary
-includes `xxhash3`, `xxhash32`, `xxhash64`, and `xxhash` (an alias for
-`xxhash64`).
-
-```text
-MariaDB [(none)]> select xxhash('Hello, world!');
-+-------------------------+
-| xxhash('Hello, world!') |
-+-------------------------+
-|     -755700219241327498 |
-+-------------------------+
-1 row in set (0.000 sec)
-```
-
-Multiple arguments are combined to produce a single hash output
-
-```text
-MariaDB [(none)]> select xxhash('Hello, ', 0x77, 'orld', '!');
-+--------------------------------------+
-| xxhash('Hello, ', 0x77, 'orld', '!') |
-+--------------------------------------+
-|                  -755700219241327498 |
-+--------------------------------------+
-1 row in set (0.000 sec)
-```
-
-Note that in SQL, all integers are an `i64`, all floats are a `f64`, and all
-decimals are represented as a string to the UDF API. This library hashes these
-types as their little endian representation. (You only need to worry about this
-if you have very obscure platform compatibility requirements, and strings and
-blobs are always unambiguous).
-
 ## Installation
 
 Compiled library binaries can be downloaded from this library's [releases] page.
@@ -215,18 +205,60 @@ The desired files can be copied to the plugin directory (usually
 `/usr/lib/mysql/plugin`) and selectively loaded:
 
 ```sql
-CREATE FUNCTION blake2b512 RETURNS string SONAME 'libudf_blake.so';
-CREATE FUNCTION blake2s256 RETURNS string SONAME 'libudf_blake.so';
-CREATE FUNCTION blake3 RETURNS string SONAME 'libudf_blake.so';
+CREATE OR REPLACE FUNCTION blake2b512 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION blake2s256 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION blake3 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION blake3_thd RETURNS string SONAME 'libudf_hash.so';
+-- the md5 and sha functions have builtin versions
+CREATE OR REPLACE FUNCTION md5_u RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha1_u RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha224 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha256 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha384 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha512 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION keccak224 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION keccak256 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha3_224 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha3_256 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha3_384 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha3_384_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha3_512 RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION xxhash RETURNS integer SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION xxhash3 RETURNS integer SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION xxhash32 RETURNS integer SONAME 'libudf_hash.so';
+-- `xxhash` and `xxhash64` are aliases
+CREATE OR REPLACE FUNCTION xxhash64 RETURNS integer SONAME 'libudf_hash.so';
 
+-- binary-returning versions of hash algorithms, as a convenience alternative to
+-- `unhex(blake3(...))`
+CREATE OR REPLACE FUNCTION blake2b512_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION blake2s256_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION blake3_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION blake3_thd_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION md5_u_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha1_u_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha224_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha256_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha384_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha512_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION keccak224_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION keccak256_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha3_224_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha3_256_bin RETURNS string SONAME 'libudf_hash.so';
+CREATE OR REPLACE FUNCTION sha3_512_bin RETURNS string SONAME 'libudf_hash.so';
+
+-- JSON creation function
 CREATE FUNCTION jsonify RETURNS string SONAME 'libudf_jsonify.so';
 
+-- IP functions
 CREATE FUNCTION ip_validate RETURNS string SONAME 'libudf_net.so';
 CREATE FUNCTION ip_to_canonical RETURNS string SONAME 'libudf_net.so';
 CREATE FUNCTION ip_to_ipv6_mapped RETURNS string SONAME 'libudf_net.so';
 
+-- random string generation
 CREATE FUNCTION lipsum RETURNS string SONAME 'libudf_lipsum.so';
 
+-- UUID interfaces
 CREATE FUNCTION uuid_generate_v1 RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_generate_v1mc RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_generate_v4 RETURNS string SONAME 'libudf_uuid.so';
@@ -243,12 +275,6 @@ CREATE FUNCTION uuid_to_bin RETURNS string SONAME 'libudf_uuid.so';
 CREATE FUNCTION uuid_from_bin RETURNS string SONAME 'libudf_uuid.so';
 -- `bin_to_uuid` and 'uuid_from_bin' are aliases
 CREATE FUNCTION bin_to_uuid RETURNS string SONAME 'libudf_uuid.so';
-
--- `xxhash` and `xxhash64` are aliases
-CREATE FUNCTION xxhash RETURNS integer SONAME 'libudf_xxhash.so';
-CREATE FUNCTION xxhash3 RETURNS integer SONAME 'libudf_xxhash.so';
-CREATE FUNCTION xxhash32 RETURNS integer SONAME 'libudf_xxhash.so';
-CREATE FUNCTION xxhash64 RETURNS integer SONAME 'libudf_xxhash.so';
 ```
 
 Note that Windows `.dll`s are built but have not been tested - please open an
@@ -283,7 +309,7 @@ docker run --rm -d \
   mdb-udf-suite-img
 
 # Enter a SQL shell
-docker exec -it mdb_udf_suite mysql -pexample
+docker exec -it mdb_udf_suite mariadb -pexample
 
 # Stop the server when done
 docker stop mdb_udf_suite
