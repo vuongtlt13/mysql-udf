@@ -89,21 +89,21 @@ mod tests {
                 (111.001, "float", true),
         ];
 
-        let mut s = String::from("{");
-        s.push_str(r#""decimal":1234.56,"#);
-        s.push_str(r#""empty_decimal":null,"#);
-        s.push_str(r#""empty_float":null,"#);
-        s.push_str(r#""empty_int":null,"#);
-        s.push_str(r#""empty_string":null,"#);
-        s.push_str(r#""float":111.001,"#);
-        s.push_str(r#""int":500,"#);
-        s.push_str(r#""neg_int":-500,"#);
-        s.push_str(r#""string":"some string""#);
-        s.push('}');
+        let expected = serde_json::json! {{
+            "decimal": 1234.56,
+            "empty_decimal": None::<()>,
+            "empty_float": None::<()>,
+            "empty_int": None::<()>,
+            "empty_string": None::<()>,
+            "float": 111.001,
+            "int": 500,
+            "neg_int": -500,
+            "string": "some string"
+        }};
 
         let mut jsonify = Jsonify::init(cfg.as_init(), arglist.as_init()).unwrap();
         let res = jsonify.process(cfg.as_process(), arglist.as_process(), None);
 
-        assert_eq!(res, Ok(s.as_str()));
+        assert_eq!(res, Ok(serde_json::to_string(&expected).unwrap().as_str()));
     }
 }
