@@ -6,12 +6,22 @@
 
 ### Added
 
+### Changed
 
+
+## [0.1.10] - 2023-10-05
+
+### Added
+
+Added hash algorithms for `sha1`, `sha2`, `sha3`, `md5`, and threaded `blake`
+versions.
 
 ### Changed
 
-`blake*` and `xxhash*` functions were moved to the new `udf-hash` library
-(output `libudf_hash.so`).
+- `blake*` and `xxhash*` functions were moved to the new `udf-hash` library
+  (output `libudf_hash.so`).
+- Hash functions now return hex by default. For binary output, a `_bin`
+  version of each function is now provided.
 
 
 ## [0.1.9] - 2023-10-04
@@ -101,7 +111,8 @@ Changed licensing from 'Apache-2.0' to 'Apache-2.0 OR GPL-2.0-or-later'
 
 <!-- next-url -->
 
-[Unreleased]: https://github.com/pluots/udf-suite/compare/v0.1.9...HEAD
+[Unreleased]: https://github.com/pluots/udf-suite/compare/v0.1.10...HEAD
+[0.1.10]: https://github.com/pluots/udf-suite/compare/v0.1.9...v0.1.10
 [0.1.9]: https://github.com/pluots/udf-suite/compare/v0.1.8...v0.1.9
 [0.1.8]: https://github.com/pluots/udf-suite/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/pluots/udf-suite/compare/v0.1.6...v0.1.7
