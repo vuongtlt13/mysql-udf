@@ -1,0 +1,28 @@
+version: "3.3"
+services:
+  mysql8-01:
+    image: vuongtlt13/mysql:8.2-debian-udf
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql8_01_data:/var/lib/mysql/
+    command:
+      - '--disable-log-bin'
+      - '--character-set-server=utf8mb4'
+      - '--collation-server=utf8mb4_unicode_ci'
+    networks:
+      - mysql8_01_network
+    environment:
+      - MYSQL_USER=root1
+      - MYSQL_PASSWORD=example
+      - MYSQL_DATABASE=example
+      - MYSQL_ROOT_PASSWORD=root
+
+volumes:
+  mysql8_01_data:
+
+
+networks:
+  mysql8_01_network:
+    name: mysql8_01_network
